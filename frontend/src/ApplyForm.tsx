@@ -111,7 +111,7 @@ export default function ApplyForm() {
         )}
       </div>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <input type="submit" style={{ margin: "5px" }} />
+        <input type="submit" style={{ margin: "5px" }} value="Prijavi se" />
       </div>
     </form>
   );
