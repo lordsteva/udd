@@ -1,43 +1,40 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { strucneSpreme } from "./utils/constants";
 
 type Inputs = {
   ime: string;
   prezime: string;
   email: string;
   cv: string;
-  stepenObrazovanja: string;
+  sprema: string;
   pismo: string;
   adresa: string;
 };
-const strucneSpreme = [
-  "I Stepen četiri razreda osnovne",
-  "II Stepen - osnovna škola",
-  "III Stepen - SSS srednja škola",
-  "IV Stepen - SSS srednja škola",
-  "V Stepen - VKV - SSS srednja škola",
-  "VI Stepen - VŠS viša škola",
-  "VII - 1 VSS visoka stručna sprema",
-  "VI-1 Osnovne trogodišnje akademske studije",
-  "VI-1 Osnovne trogodišnje strukovne studije",
-  "VI-2 Specijalističke strukovne studije",
-  "VII-1a Osnovne četvorogodišnje akademske studije",
-  "VII-1a Integrisane master studije studije",
-  "VII-1b Master",
-  "VII-2 Magistar nauka",
-  "VII-2 Specijalizacija u medicini",
-  "VII-2 Specijalističke akademske studije",
-  "VIII Doktor nauka",
-];
-
 export default function ApplyForm() {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<Inputs>();
-  const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data);
+
+  const [applying, setApplying] = useState<any>(null);
+  useEffect(() => {
+    fetch("http://localhost:8080/api/log/");
+  }, []);
+  const onSubmit: SubmitHandler<Inputs> = (data) => {
+    const formData = new FormData();
+    data.cv = data.cv[0];
+    data.pismo = data.pismo[0];
+
+    //@ts-ignore
+    Object.keys(data).forEach((key) => formData.append(key, data[key]));
+    setApplying("Indexing....");
+    fetch("http://localhost:8080/api/cv/", {
+      method: "post",
+      body: formData,
+    }).then(() => setApplying("DONE!"));
+  };
   const css = `
   .wrapper {
       display: block;
@@ -87,14 +84,14 @@ export default function ApplyForm() {
       </div>
       <div className="wrapper">
         <div className="title">Stepn obrazovanja:</div>
-        <select {...register("stepenObrazovanja", { required: true })}>
+        <select {...register("sprema", { required: true })}>
           {strucneSpreme.map((ss, id) => (
             <option key={id} value={id}>
               {ss}
             </option>
           ))}
         </select>
-        {errors.stepenObrazovanja && (
+        {errors.sprema && (
           <div className="error">Stepen obrazovanja je obavezan</div>
         )}
       </div>
@@ -112,6 +109,9 @@ export default function ApplyForm() {
       </div>
       <div style={{ display: "flex", justifyContent: "center" }}>
         <input type="submit" style={{ margin: "5px" }} value="Prijavi se" />
+        <span style={{ display: "flex", alignItems: "center" }}>
+          {applying}
+        </span>
       </div>
     </form>
   );
